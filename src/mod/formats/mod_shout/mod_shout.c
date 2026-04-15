@@ -524,6 +524,9 @@ static void *SWITCH_THREAD_FUNC read_stream_thread(switch_thread_t *thread, void
 	switch_curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, context->curl_error_buff);
 	curl_easy_setopt(curl_handle, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
 	curl_easy_setopt(curl_handle, CURLOPT_SOCKOPTDATA, (void *)context);
+	// BEGIN_PATCH_FOR_EPICODE
+	switch_curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0);
+	// END_PATCH_FOR_EPICODE
 
 	cc = switch_curl_easy_perform(curl_handle);
 

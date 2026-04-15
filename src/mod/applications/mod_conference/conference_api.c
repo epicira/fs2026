@@ -360,6 +360,10 @@ switch_status_t conference_api_sub_unhold(conference_member_t *member, switch_st
 		return SWITCH_STATUS_GENERR;
 
 	conference_utils_member_clear_flag_locked(member, MFLAG_HOLD);
+	// BEGIN_PATCH_FOR_EPICODE_IRADIALER
+	conference_utils_member_set_flag_locked(member, MFLAG_CAN_HEAR);
+	conference_utils_member_set_flag(member, MFLAG_INDICATE_UNDEAF);
+	// END_PATCH_FOR_EPICODE_IRADIALER
 
 	if (member->session && !conference_utils_member_test_flag(member, MFLAG_MUTE_DETECT)) {
 		switch_core_media_hard_mute(member->session, SWITCH_FALSE);
@@ -423,6 +427,11 @@ switch_status_t conference_api_sub_hold(conference_member_t *member, switch_stre
 	if (member->session) {
 		switch_core_media_hard_mute(member->session, SWITCH_TRUE);
 	}
+
+	// BEGIN_PATCH_FOR_EPICODE_IRADIALER
+	conference_utils_member_clear_flag_locked(member, MFLAG_CAN_HEAR);
+	conference_utils_member_set_flag(member, MFLAG_INDICATE_DEAF);
+	// END_PATCH_FOR_EPICODE_IRADIALER
 
 	conference_utils_member_set_flag(member, MFLAG_HOLD);
 	

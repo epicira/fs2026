@@ -592,7 +592,17 @@ void conference_member_add_file_data(conference_member_t *member, int16_t *data,
 				if (switch_core_speech_read_tts(member->fnode->sh, file_frame, &speech_len, &flags) == SWITCH_STATUS_SUCCESS) {
 					file_sample_len = file_data_len / 2 / member->conference->channels;
 				} else {
-					file_sample_len = 0;
+					// BEGIN_PATCH_FOR_EPICODE_IRADIALER
+					switch_event_t *event;
+					file_sample_len = file_data_len = 0;
+					if (test_eflag(member->conference, EFLAG_SPEAK_TEXT_MEMBER) &&
+						switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, CONF_EVENT_MAINT) ==
+							SWITCH_STATUS_SUCCESS) {
+						conference_member_add_event_data(member, event);
+						switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Action", "speak-text-member-done");
+						switch_event_fire(&event);
+					}
+					// END_PATCH_FOR_EPICODE_IRADIALER
 				}
 			} else if (member->fnode->type == NODE_TYPE_FILE) {
 				switch_core_file_read(&member->fnode->fh, file_frame, &file_sample_len);

@@ -1960,6 +1960,39 @@ static void our_sofia_event_callback(nua_event_t event,
 
 				switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "var_origination_caller_id_number", ref_by_user);
 				switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "var_origination_caller_id_name", ref_by_user);
+
+				// START_EPICODE_PATCH_TO_HANDLE_SSC
+				if (!strcmp(action, "call")) {
+					if (sip->sip_refer_to) {
+						if (sip->sip_refer_to->r_url->url_params) {
+							switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Refer-To",
+														   sip->sip_refer_to->r_url->url_params);
+						}
+					}
+
+					if (sip->sip_unknown) {
+						sip_unknown_t *field = sip->sip_unknown;
+						while (field) {
+							if (field->un_name && field->un_value) {
+								switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, field->un_name,
+															   field->un_value);
+							}
+							field = field->un_next;
+						}
+					}
+
+					if (sip->sip_request) {
+						switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Request-Host",
+													   sip->sip_request->rq_url->url_host);
+						switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Request-Port",
+													   sip->sip_request->rq_url->url_port);
+						switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Request-Scheme",
+													   sip->sip_request->rq_url->url_scheme);
+						switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Request-Params",
+													   sip->sip_request->rq_url->url_params);
+					}
+				}
+				// END_EPICODE_PATCH_TO_HANDLE_SSC
 				switch_event_fire(&event);
 			}
 
